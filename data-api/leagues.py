@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 import requests
 import team_statistics
@@ -21,14 +22,15 @@ def get_leagues(season=2025):
 
 
 def get_fixtures(league, date_from, season=2025):
-    url = f"{BASE_URL}/fixtures?season={season}&league={league['league']['id']}&date={date_from}"
-    response = requests.get(url, headers=HEADERS)
+    url = f"{BASE_URL}/fixtures?season={season}&league={league['league']['id']}&date={date_from}&timezone='Europe/London'"
     print(url)
+    response = requests.get(url, headers=HEADERS)
     return response.json().get("response", {})
 
 
 def get_upcoming_weekend():
-    today = datetime.today()
+    today = datetime.now(ZoneInfo("Europe/London"))
+
 
 
 
@@ -92,16 +94,15 @@ def validate_fixture_criteria(fixtures):
     for fixture in fixtures:
         # make sure both teams have a 2.5 avaregae ratio
         is25=get_25_prediction(fixture)
-        if(is25>=2.5):
+        if(is25>=3):
+            #betting_list.append(fixture)
+
+           # stats = team_statistics.get_fixture_statistic(fixture)
+           # if stats["home_team"]["clean_sheet_perc"] < 0.4 and stats["away_team"]["clean_sheet_perc"] < 0.4:
+           #     if stats["home_team"]["failed_to_score_perc"] < 0.4 and stats["away_team"]["failed_to_score_perc"] < 0.4:
+           #         print("BAH")
+           #         betting_list.append(fixture)
             betting_list.append(fixture)
-
-            ##stats = team_statistics.get_fixture_statistic(fixture)
-            ##if stats[0]["clean_sheet_perc"] < 0.4 and stats[1]["clean_sheet_perc"]<0.4:
-             ##   if stats[0]["failed_to_score_perc"] < 0.4 and stats[1]["failed_to_score_perc"]<0.4:
-             ##       if stats[0]["average_goals"] > 2 and stats[1]["average_goals"] > 2:
-              ##          print("BAH")
-              ##          betting_list.append(fixture)
-
     return betting_list
 
 

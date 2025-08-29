@@ -16,11 +16,11 @@ def get_fixture_statistic(fixture):
     date_obj = datetime.fromisoformat(fixture_date.replace("Z", "+00:00"))  # Handles timezone
 
     formatted_date = date_obj.strftime('%Y-%m-%d')
-    team_features=[]
+    team_features={}
     home_feature = get_team_statistics(home_id, season, league_id,formatted_date)
-    team_features.append(home_feature)
+    team_features["home_team"]=home_feature
     away_feature = get_team_statistics(away_id, season, league_id,formatted_date)
-    team_features.append(away_feature)
+    team_features["away_team"]=away_feature
     return team_features
 
 def get_team_statistics(team_id, season, league_id, to_date):

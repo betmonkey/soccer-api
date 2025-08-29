@@ -1,3 +1,5 @@
+from zoneinfo import ZoneInfo
+
 import streamlit as st
 import requests
 import pandas as pd
@@ -105,7 +107,8 @@ for fix in fixtures_data:
     time = fixture["date"]
 
     # Parse datetime
-    kickoff_dt = datetime.fromisoformat(time.replace("Z", "+00:00"))
+    kickoff_dt = datetime.fromisoformat(time.replace("Z", "+00:00")).astimezone(ZoneInfo("Europe/London")
+)
     kickoff_date = kickoff_dt.strftime("%A, %d %B %Y")  # e.g. Friday, 29 August 2025
     kickoff_time = kickoff_dt.strftime("%H:%M")
 
