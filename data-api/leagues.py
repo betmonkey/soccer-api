@@ -37,13 +37,15 @@ def get_upcoming_weekend():
     # Calculate days until Friday (weekday 4)
     days_until_friday = (4 - weekday) % 7
     friday = today + timedelta(days=days_until_friday)
-    saturday = today #friday + timedelta(days=1)
-    sunday = today + timedelta(days=1) # friday + timedelta(days=2)
+    saturday = friday + timedelta(days=1)
+    sunday =  friday + timedelta(days=2)
 
     return {
        #friday.strftime("%Y-%m-%d"),
-       saturday.strftime("%Y-%m-%d"),
-       sunday.strftime("%Y-%m-%d")
+       #saturday.strftime("%Y-%m-%d"),
+       #sunday.strftime("%Y-%m-%d")
+        "2025-08-30",
+        "2025-08-31"
     }
 
 
