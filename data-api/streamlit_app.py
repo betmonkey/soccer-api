@@ -18,6 +18,7 @@ st.title("⚽ Upcoming Football Fixtures > 2.5")
 @st.cache_data
 def get_fixtures(today):
     print ({"data": f"Fresh data generated on {today}"})
+    all_bets = []
     leagues_list = leagues.filter_leagues()
     all_bets = []
     for current_league in leagues_list:
@@ -26,6 +27,7 @@ def get_fixtures(today):
         betting_list = leagues.validate_fixture_criteria(fixtures)
         all_bets = all_bets + betting_list
         time.sleep(30)
+
     return all_bets
 
 # Get today's date (string is better than datetime to avoid time granularity issues)
