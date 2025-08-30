@@ -5,6 +5,7 @@ import requests
 import pandas as pd
 import datetime
 import leagues
+import time
 
 
 st.set_page_config(page_title="Football Fixtures > 2.5")
@@ -24,6 +25,7 @@ def get_fixtures(today):
         fixtures = leagues.filter_fixtures_by_weekend(current_league)
         betting_list = leagues.validate_fixture_criteria(fixtures)
         all_bets = all_bets + betting_list
+        time.sleep(30)
     return all_bets
 
 # Get today's date (string is better than datetime to avoid time granularity issues)
@@ -96,6 +98,7 @@ st.markdown('<div class="fixtures-grid">', unsafe_allow_html=True)
 
 current_date = None
 current_league = None
+
 
 for fix in fixtures_data:
     fixture = fix["fixture"]
