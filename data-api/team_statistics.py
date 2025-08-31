@@ -7,25 +7,50 @@ API_KEY = "53671f365354459bf8177e122344ba4d"
 BASE_URL = "https://v3.football.api-sports.io"
 HEADERS = {"x-apisports-key": API_KEY}
 
+
 def get_fixture_statistic(fixture):
     home_id = fixture["teams"]["home"]["id"]
     away_id = fixture["teams"]["away"]["id"]
     league_id = fixture["league"]["id"]
     season = fixture["league"]["season"]
-    fixture_date=fixture["fixture"]["date"]
+    fixture_date = fixture["fixture"]["date"]
     date_obj = datetime.fromisoformat(fixture_date.replace("Z", "+00:00"))  # Handles timezone
 
     formatted_date = date_obj.strftime('%Y-%m-%d')
-    team_features={}
-    home_feature = get_team_statistics(home_id, season, league_id,formatted_date)
-    team_features["home_team"]=home_feature
-    away_feature = get_team_statistics(away_id, season, league_id,formatted_date)
-    team_features["away_team"]=away_feature
+    team_features = {}
+    home_feature = get_team_statistics(home_id, season, league_id, formatted_date)
+    team_features["home_team"] = home_feature
+    away_feature = get_team_statistics(away_id, season, league_id, formatted_date)
+    team_features["away_team"] = away_feature
     return team_features
 
 
 def default_if_zero(x, default=1):
     return x if x != 0 else default
+
+
+def get_last_x_fixtures(team, num_games):
+    url = f"{BASE_URL}/fixtures?team={team}&last={num_games}"
+    print(url)
+    response = requests.get(url, headers=HEADERS)
+    return response.json().get("response", {})
+
+
+def get_team_last_x_game_statistics(team_id, num_games):
+    last_games = get_last_x_fixtures(team_id, num_games)
+    return last_games
+
+
+def check_team_over25_lasy_x_games(team_id, num_games):
+    games = get_team_last_x_game_statistics(team_id, num_games)
+    over25 = True
+    for game in games:
+        try:
+            if game["goals"]["home"] + game["goals"]["away"] < 2.5:
+                over25 = False
+        except TypeError as e:
+            over25 = False
+    return over25
 
 
 def get_team_statistics(team_id, season, league_id, to_date):
@@ -36,7 +61,7 @@ def get_team_statistics(team_id, season, league_id, to_date):
         "league": league_id
     }
     team_stats = requests.get(stats_url, headers=HEADERS).json().get("response", {})
-
+    over25 = check_team_over25_lasy_x_games(team_id, 2)
 
     # Repeat for away team and combine features
     features = {
@@ -48,36 +73,46 @@ def get_team_statistics(team_id, season, league_id, to_date):
         "average_goals_against": team_stats["goals"]["against"]["average"]["total"],
 
         #Goals Average Total Per Match For and Against
-        "average_goals": float(team_stats["goals"]["for"]["average"]["total"])+float(team_stats["goals"]["against"]["average"]["total"]),
+        "average_goals": float(team_stats["goals"]["for"]["average"]["total"]) + float(
+            team_stats["goals"]["against"]["average"]["total"]),
 
-        "average_goals_for_home": team_stats["goals"]["for"]["total"]["home"] / default_if_zero(team_stats["fixtures"]["played"]["home"]),
+        "average_goals_for_home": team_stats["goals"]["for"]["total"]["home"] / default_if_zero(
+            team_stats["fixtures"]["played"]["home"]),
 
-        "average_goals_for_away": team_stats["goals"]["for"]["total"]["away"] / default_if_zero(team_stats["fixtures"]["played"]["away"]),
+        "average_goals_for_away": team_stats["goals"]["for"]["total"]["away"] / default_if_zero(
+            team_stats["fixtures"]["played"]["away"]),
 
-        "average_goals_against_home": team_stats["goals"]["against"]["total"]["home"] / default_if_zero(team_stats["fixtures"]["played"]["home"]),
+        "average_goals_against_home": team_stats["goals"]["against"]["total"]["home"] / default_if_zero(
+            team_stats["fixtures"]["played"]["home"]),
 
-        "average_goals_against_away": team_stats["goals"]["against"]["total"]["away"] / default_if_zero(team_stats["fixtures"]["played"]["away"]),
+        "average_goals_against_away": team_stats["goals"]["against"]["total"]["away"] / default_if_zero(
+            team_stats["fixtures"]["played"]["away"]),
 
         #Clean Sheet Percentage
-        "clean_sheet_perc":  team_stats["clean_sheet"]["total"] / default_if_zero(team_stats["fixtures"]["played"]["total"]),
+        "clean_sheet_perc": team_stats["clean_sheet"]["total"] / default_if_zero(
+            team_stats["fixtures"]["played"]["total"]),
 
         #Failed to Score Percentage
-        "failed_to_score_perc": team_stats["failed_to_score"]["total"] / default_if_zero(team_stats["fixtures"]["played"]["total"]),
+        "failed_to_score_perc": team_stats["failed_to_score"]["total"] / default_if_zero(
+            team_stats["fixtures"]["played"]["total"]),
 
         #Failed to Score Home Percentage
-        "failed_to_score_home_perc": team_stats["failed_to_score"]["home"] / default_if_zero(team_stats["fixtures"]["played"]["home"]),
+        "failed_to_score_home_perc": team_stats["failed_to_score"]["home"] / default_if_zero(
+            team_stats["fixtures"]["played"]["home"]),
 
         # Failed to Score Away Percentage
-        "failed_to_score_away_perc": team_stats["failed_to_score"]["away"] / default_if_zero(team_stats["fixtures"]["played"]["away"]),
+        "failed_to_score_away_perc": team_stats["failed_to_score"]["away"] / default_if_zero(
+            team_stats["fixtures"]["played"]["away"]),
 
         # Clean Sheet Percentage
-        "clean_sheet_home_perc": team_stats["clean_sheet"]["home"] / default_if_zero(team_stats["fixtures"]["played"]["home"]),
+        "clean_sheet_home_perc": team_stats["clean_sheet"]["home"] / default_if_zero(
+            team_stats["fixtures"]["played"]["home"]),
 
         # Failed to Score Percentage
-        "clean_sheet_away_perc": team_stats["clean_sheet"]["away"] / default_if_zero(team_stats["fixtures"]["played"]["away"])
+        "clean_sheet_away_perc": team_stats["clean_sheet"]["away"] / default_if_zero(
+            team_stats["fixtures"]["played"]["away"]),
 
-
+        "over_25_last_x": over25
     }
-
 
     return features
