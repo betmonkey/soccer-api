@@ -9,7 +9,7 @@ import time
 
 
 st.set_page_config(page_title="Football Fixtures > 2.5")
-st.title("⚽ Upcoming Football Fixtures > 2.5")
+st.title("⚽  Football Fixtures > 2.5")
 
 
 # --------------------
