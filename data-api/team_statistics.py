@@ -31,7 +31,6 @@ def default_if_zero(x, default=1):
 
 def get_last_x_fixtures(team, num_games):
     url = f"{BASE_URL}/fixtures?team={team}&last={num_games}"
-    print(url)
     response = requests.get(url, headers=HEADERS)
     return response.json().get("response", {})
 

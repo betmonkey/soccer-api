@@ -10,7 +10,7 @@ BASE_URL = "https://v3.football.api-sports.io"
 HEADERS = {"x-apisports-key": API_KEY}
 
 # - "England","Scotland","France","Germany","Italy", "Croatia", "Denmark","Ireland","USA"
-filter_countries = ["England", "Scotland", "France", "Germany", "Italy", "Croatia", "Denmark", "Ireland", "USA"]
+filter_countries = ["England", "Scotland", "France", "Germany", "Italy", "Croatia", "Denmark", "Ireland", "USA","Japan","Hungary","Finland","Norway"]
 
 
 # - Get All Leagues That Are Running This Season - #
@@ -22,7 +22,6 @@ def get_leagues(season=2025):
 
 def get_fixtures(league, date_from, season=2025):
     url = f"{BASE_URL}/fixtures?season={season}&league={league['league']['id']}&date={date_from}&timezone='Europe/London'"
-    print(url)
     response = requests.get(url, headers=HEADERS)
     return response.json().get("response", {})
 
@@ -84,30 +83,74 @@ def get_25_prediction(fixture):
     return over_under
 
 
+def has_low_clean_sheet_rate(stats, threshold=0.5):
+    """Both teams must have < threshold clean sheet rate."""
+    print(f"Clean Sheet Ratio Home: {stats['home_team']['clean_sheet_home_perc']} Away :{stats['away_team']['clean_sheet_home_perc']}")
+    return (
+            stats["home_team"]["clean_sheet_home_perc"] < threshold and
+            stats["away_team"]["clean_sheet_away_perc"] < threshold
+    )
+
+
+def scores_consistently(stats, threshold=0.5):
+    """Both teams must fail to score in < threshold of games."""
+    print(f"Teams Failed To Score Percentage Home: {stats['home_team']['failed_to_score_home_perc']} Away :{stats['away_team']['failed_to_score_away_perc']}")
+    return (
+            stats["home_team"]["failed_to_score_home_perc"] < threshold and
+            stats["away_team"]["failed_to_score_away_perc"] < threshold
+    )
+
+
+def has_high_goal_activity(stats, threshold=2.5):
+    """Both teams must have combined goals for/against > threshold."""
+    home_total = stats["home_team"]["average_goals_for_home"] + stats["home_team"]["average_goals_against_home"]
+    away_total = stats["away_team"]["average_goals_for_away"] + stats["away_team"]["average_goals_against_away"]
+    print(f"Home Average Goals :{home_total} Away Average Goals:{away_total}")
+    return home_total >= threshold and away_total >= threshold
+
+
+def recent_over_25(stats):
+    """Both teams must have recent over 2.5 goal trend flagged."""
+
+    return stats["home_team"].get("over_25_last_x") and stats["away_team"].get("over_25_last_x")
+
+
+def qualifies_for_over25_model(stats):
+    """Composite filter for high-scoring fixture candidates."""
+    clean_sheets = has_low_clean_sheet_rate(stats)
+    if not clean_sheets:
+        print("Not Suitable As Not Got Clean Sheet Ratio")
+    scores_consistency = scores_consistently(stats)
+
+    if not scores_consistency:
+        print("Not Suitable As Not Scoring Consistently")
+
+    goal_activity = has_high_goal_activity(stats)
+    if not goal_activity:
+        print("Not Suitable As Not High Goal Activity Home Average For/Against")
+
+    recent_over25 = recent_over_25(stats)
+    if not recent_over25:
+        print(f"Not Suitable Recent Over 25 Home:{stats['home_team']['over_25_last_x']} Away:{stats['away_team']["over_25_last_x"]}")
+
+    return (
+            clean_sheets and
+            scores_consistency and
+            goal_activity and
+            recent_over25
+    )
+
+
 def validate_fixture_criteria(fixtures):
     betting_list = []
     for fixture in fixtures:
-        # make sure both teams have a 2.5 avaregae ratio
-        #is25=get_25_prediction(fixture)
-        #if(is25>=2):
-        #betting_list.append(fixture)
         try:
-
+            print("------------------------------------------------------------------------")
+            print(f"Examining Fixture....{fixture['teams']['home']['name']} vs {fixture['teams']['away']['name']}")
             stats = team_statistics.get_fixture_statistic(fixture)
-
-            # Must have less than 50% of games clean sheets for both sides
-            if stats["home_team"]["clean_sheet_home_perc"] < 0.5 and stats["away_team"]["clean_sheet_away_perc"] < 0.5:
-                # Must not score in less than 50% of games
-                if stats["home_team"]["failed_to_score_home_perc"] < 0.5 and stats["away_team"][
-                    "failed_to_score_away_perc"] < 0.5:
-                    # Goals for and away must be great than 2.5 for home team
-                    if stats["home_team"]["average_goals_for_home"] + stats["home_team"][
-                        "average_goals_against_home"] > 2.5:
-                        # Goals for and away must be great than 2.5 for away team
-                        if stats["away_team"]["average_goals_for_away"] + stats["away_team"][
-                            "average_goals_against_away"] > 2.5:
-                            if stats["home_team"]["over_25_last_x"] and stats["away_team"]["over_25_last_x"]:
-                                betting_list.append(fixture)
+            if qualifies_for_over25_model(stats):
+                print("Suitable to Bet")
+                betting_list.append(fixture)
         except ZeroDivisionError as e:
             print("Division By Zero Error")
         # betting_list.append(fixture)
@@ -118,7 +161,6 @@ leagues = filter_leagues()
 all_bets = []
 for league in leagues:
     info = league['league']
-    print(info)
     fixtures = filter_fixtures_by_weekend(league)
     betting_list = validate_fixture_criteria(fixtures);
     all_bets = all_bets + betting_list
