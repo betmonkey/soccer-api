@@ -162,7 +162,7 @@ with right_col:
 
     fig, ax = plt.subplots()
     ax.bar(df["Label"], df["Value"], color="cornflowerblue")
-    ax.set_ylabel("Value")
+    ax.set_ylabel("Games")
     ax.tick_params(axis='x', labelrotation=45)
 
     ax.set_title("Reasons")
