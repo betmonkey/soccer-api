@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 import pandas as pd
 
 import streamlit as st
+import today
 
 import leagues
 from stats_store import StatsStore
@@ -39,6 +40,10 @@ def get_fixtures(today):
 
 # Get today's date (string is better than datetime to avoid time granularity issues)
 today_str = datetime.today().strftime("%A, %d %B %Y")
+if today.weekday() in [4, 5, 6]:
+    today_str = "Weekend"
+
+
 fixtures_data = get_fixtures(today_str)
 
 # ✅ Sort fixtures by date/time
