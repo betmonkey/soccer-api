@@ -38,7 +38,7 @@ def get_fixtures(today):
 
 
 # Get today's date (string is better than datetime to avoid time granularity issues)
-today_str = datetime.today().isoformat()
+today_str = datetime.today().strftime("%A, %d %B %Y")
 fixtures_data = get_fixtures(today_str)
 
 # ✅ Sort fixtures by date/time
