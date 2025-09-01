@@ -1,11 +1,10 @@
 from datetime import datetime
 
 import requests
-
+from football_data_api import get_last_x_fixtures, get_statistics
 # --- API Setup ---
-API_KEY = "53671f365354459bf8177e122344ba4d"
-BASE_URL = "https://v3.football.api-sports.io"
-HEADERS = {"x-apisports-key": API_KEY}
+
+from stats_store import StatsStore
 
 
 def get_fixture_statistic(fixture):
@@ -29,12 +28,6 @@ def default_if_zero(x, default=1):
     return x if x != 0 else default
 
 
-def get_last_x_fixtures(team, num_games):
-    url = f"{BASE_URL}/fixtures?team={team}&last={num_games}"
-    response = requests.get(url, headers=HEADERS)
-    return response.json().get("response", {})
-
-
 def get_team_last_x_game_statistics(team_id, num_games):
     last_games = get_last_x_fixtures(team_id, num_games)
     return last_games
@@ -53,13 +46,7 @@ def check_team_over25_lasy_x_games(team_id, num_games):
 
 
 def get_team_statistics(team_id, season, league_id, to_date):
-    stats_url = f"https://v3.football.api-sports.io/teams/statistics?team={team_id}&league={league_id}&season={season}&date={to_date}"
-    stats_params = {
-        "team": team_id,
-        "season": season,
-        "league": league_id
-    }
-    team_stats = requests.get(stats_url, headers=HEADERS).json().get("response", {})
+    team_stats = get_statistics(team_id, season, league_id, to_date)
     over25 = check_team_over25_lasy_x_games(team_id, 2)
 
     # Repeat for away team and combine features
@@ -115,3 +102,75 @@ def get_team_statistics(team_id, season, league_id, to_date):
     }
 
     return features
+
+
+def has_low_clean_sheet_rate(stats, threshold=0.5):
+    """Both teams must have < threshold clean sheet rate."""
+    print(
+        f"Clean Sheet Ratio Home: {stats['home_team']['clean_sheet_home_perc']} Away :{stats['away_team']['clean_sheet_home_perc']}")
+    return (
+            stats["home_team"]["clean_sheet_home_perc"] < threshold and
+            stats["away_team"]["clean_sheet_away_perc"] < threshold
+    )
+
+
+def scores_consistently(stats, threshold=0.5):
+    """Both teams must fail to score in < threshold of games."""
+    print(
+        f"Teams Failed To Score Percentage Home: {stats['home_team']['failed_to_score_home_perc']} Away :{stats['away_team']['failed_to_score_away_perc']}")
+    return (
+            stats["home_team"]["failed_to_score_home_perc"] < threshold and
+            stats["away_team"]["failed_to_score_away_perc"] < threshold
+    )
+
+
+def has_high_goal_activity(stats, threshold=2.5):
+    """Both teams must have combined goals for/against > threshold."""
+    home_total = stats["home_team"]["average_goals_for_home"] + stats["home_team"]["average_goals_against_home"]
+    away_total = stats["away_team"]["average_goals_for_away"] + stats["away_team"]["average_goals_against_away"]
+    print(f"Home Average Goals :{home_total} Away Average Goals:{away_total}")
+    return home_total >= threshold and away_total >= threshold
+
+
+def recent_over_25(stats):
+    """Both teams must have recent over 2.5 goal trend flagged."""
+
+    return stats["home_team"].get("over_25_last_x") and stats["away_team"].get("over_25_last_x")
+
+
+def qualifies_for_over25_model(stats):
+    """Composite filter for high-scoring fixture candidates."""
+    clean_sheets = has_low_clean_sheet_rate(stats)
+    store = StatsStore()
+    if not clean_sheets:
+        print("Not Suitable As Has Had Too Many Clean Sheets")
+        store.increment("Clean Sheets")
+        return False
+    scores_consistency = scores_consistently(stats)
+
+    if not scores_consistency:
+        print("Not Suitable As Not Scoring Consistently in Each Game")
+        store.increment("Consistent Scoring")
+        return False
+
+    goal_activity = has_high_goal_activity(stats)
+    if not goal_activity:
+        print("Not Suitable As Not High Goal Activity Home Average For/Against")
+        store.increment("Average Goals")
+        return False
+    recent_over25 = recent_over_25(stats)
+    if not recent_over25:
+        store.increment("Not 2 Prev 25")
+        print(
+            f"Not Suitable Recent Over 25 Home:{stats['home_team']['over_25_last_x']} Away:{stats['away_team']["over_25_last_x"]}")
+        return False
+    if clean_sheets and scores_consistency and goal_activity and recent_over25:
+        print("Betted")
+        store.increment("Successfull Bet")
+
+    return (
+            clean_sheets and
+            scores_consistency and
+            goal_activity and
+            recent_over25
+    )
