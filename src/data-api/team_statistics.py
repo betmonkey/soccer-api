@@ -144,21 +144,22 @@ def qualifies_for_over25_model(stats):
     store = StatsStore()
     if not clean_sheets:
         print("Not Suitable As Has Had Too Many Clean Sheets")
-        store.increment("Clean Sheets")
+        store.increment("Too Many Clean Sheets")
         return False
     scores_consistency = scores_consistently(stats)
 
     if not scores_consistency:
         print("Not Suitable As Not Scoring Consistently in Each Game")
-        store.increment("Consistent Scoring")
+        store.increment("Inconsistent Scoring")
         return False
 
     goal_activity = has_high_goal_activity(stats)
     if not goal_activity:
         print("Not Suitable As Not High Goal Activity Home Average For/Against")
-        store.increment("Average Goals")
+        store.increment("Low Average Goals")
         return False
     recent_over25 = recent_over_25(stats)
+    #
     if not recent_over25:
         store.increment("Not 2 Prev 25")
         print(

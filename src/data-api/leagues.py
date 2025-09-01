@@ -8,7 +8,7 @@ from team_statistics import (has_low_clean_sheet_rate, has_high_goal_activity, r
 
 # - "England","Scotland","France","Germany","Italy", "Croatia", "Denmark","Ireland","USA"
 filter_countries = ["England", "Scotland", "France", "Germany", "Italy", "Croatia", "Denmark", "Ireland", "USA","Japan",
-                    "Hungary","Finland","Norway"]
+                    "Hungary","Finland","Norway","Iceland","Switzerland"]
 
 
 #filter_countries = ["USA"]

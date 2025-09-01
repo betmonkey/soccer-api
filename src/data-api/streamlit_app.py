@@ -10,11 +10,6 @@ import leagues
 from stats_store import StatsStore
 import matplotlib.pyplot as plt
 
-st.set_page_config(page_title="Football Fixtures > 2.5")
-st.title("⚽  Football Fixtures > 2.5")
-total_fixtures = 0
-
-
 def get_stats_df():
     raw = StatsStore().all()
     return pd.DataFrame(list(raw.items()), columns=["Label", "Value"])
@@ -33,7 +28,7 @@ def get_fixtures(today):
         fixtures = leagues.filter_fixtures_by_weekend(current_league)
         betting_list = leagues.validate_fixture_criteria(fixtures)
         all_bets = all_bets + betting_list
-        time.sleep(30)
+        #time.sleep(30)
 
     return all_bets
 
@@ -102,6 +97,12 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+
+st.set_page_config(page_title="Football Fixtures > 2.5")
+st.title("⚽  Football Fixtures > 2.5")
+st.markdown(f'<div class="league-title">{leagues.filter_countries}</div>', unsafe_allow_html=True)
+
+
 # Start grid container
 st.markdown('<div class="fixtures-grid">', unsafe_allow_html=True)
 
@@ -163,7 +164,7 @@ with right_col:
     ax.bar(df["Label"], df["Value"], color="cornflowerblue")
     ax.set_ylabel("Value")
     ax.tick_params(axis='x', labelrotation=45)
-    print(total_fixtures)
+
     ax.set_title("Reasons")
     st.pyplot(fig)
 
