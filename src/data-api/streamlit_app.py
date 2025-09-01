@@ -127,7 +127,7 @@ with left_col:
         away = teams['away']
         time = fixture["date"]
 
-        kickoff_dt = datetime.fromisoformat(time.replace("Z", "+00:00")).astimezone(ZoneInfo("Europe/London"))
+        kickoff_dt = datetime.datetime.fromisoformat(time.replace("Z", "+00:00")).astimezone(ZoneInfo("Europe/London"))
         kickoff_date = kickoff_dt.strftime("%A, %d %B %Y")
         kickoff_time = kickoff_dt.strftime("%H:%M")
 
