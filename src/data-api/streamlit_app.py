@@ -1,10 +1,10 @@
-from datetime import datetime
+import datetime
 import time
 from zoneinfo import ZoneInfo
 import pandas as pd
 
 import streamlit as st
-import today
+
 
 import leagues
 from stats_store import StatsStore
@@ -39,8 +39,8 @@ def get_fixtures(today):
 
 
 # Get today's date (string is better than datetime to avoid time granularity issues)
-today_str = datetime.today().strftime("%A, %d %B %Y")
-if today.weekday() in [4, 5, 6]:
+today_str = datetime.date.today().strftime("%A, %d %B %Y")
+if datetime.date.today().weekday() in [4, 5, 6]:
     today_str = "Weekend"
 
 
@@ -49,7 +49,7 @@ fixtures_data = get_fixtures(today_str)
 # ✅ Sort fixtures by date/time
 fixtures_data = sorted(
     fixtures_data,
-    key=lambda x: datetime.fromisoformat(x["fixture"]["date"].replace("Z", "+00:00"))
+    key=lambda x: datetime.datetime.fromisoformat(x["fixture"]["date"].replace("Z", "+00:00"))
 )
 
 # Add CSS for grid layout once
