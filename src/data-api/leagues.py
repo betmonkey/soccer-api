@@ -64,7 +64,6 @@ def validate_fixture_criteria(fixtures):
             print(f"Examining Fixture....{fixture['teams']['home']['name']} vs {fixture['teams']['away']['name']}")
             stats = get_fixture_statistic(fixture)
             if qualifies_for_over25_model(stats):
-
                 betting_list.append(fixture)
         except ZeroDivisionError as e:
             print("Division By Zero Error")
@@ -72,12 +71,4 @@ def validate_fixture_criteria(fixtures):
     return betting_list
 
 
-#leagues = filter_leagues()
-#all_bets = []
-#for league in leagues:
-#    info = league['league']
-#    fixtures = filter_fixtures_by_weekend(league)
-#    betting_list = validate_fixture_criteria(fixtures);
-#    all_bets = all_bets + betting_list
 
-#print(all_bets)
