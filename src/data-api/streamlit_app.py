@@ -32,7 +32,7 @@ def get_fixtures(today):
         fixtures = leagues.filter_fixtures_by_weekend(current_league)
         betting_list = leagues.validate_fixture_criteria(fixtures)
         all_bets = all_bets + betting_list
-        #time.sleep(30)
+        time.sleep(30)
 
     return all_bets
 

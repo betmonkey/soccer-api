@@ -7,11 +7,11 @@ from team_statistics import (has_low_clean_sheet_rate, has_high_goal_activity, r
                              qualifies_for_over25_model, get_fixture_statistic)
 
 # - "England","Scotland","France","Germany","Italy", "Croatia", "Denmark","Ireland","USA"
-#filter_countries = ["England", "Scotland", "France", "Germany", "Italy", "Croatia", "Denmark", "Ireland", "USA","Japan",
-#                    "Hungary","Finland","Norway"]
+filter_countries = ["England", "Scotland", "France", "Germany", "Italy", "Croatia", "Denmark", "Ireland", "USA","Japan",
+                    "Hungary","Finland","Norway"]
 
 
-filter_countries = ["USA"]
+#filter_countries = ["USA"]
 
 def get_upcoming_weekend():
     today = datetime.now(ZoneInfo("Europe/London"))
