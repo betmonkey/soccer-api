@@ -38,7 +38,7 @@ def get_fixtures(today):
         for day in fixtures:
             print(f"League: {current_league}")
             complete_fixtures.append(day)
-      time.sleep(10)
+    time.sleep(10)
 
     return complete_fixtures
 
