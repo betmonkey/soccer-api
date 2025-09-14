@@ -12,6 +12,8 @@ class Fixture:
         self.league_id = fixture_data["league"]["id"]
         self.season = fixture_data["league"]["season"]
         self.date_str = fixture_data["fixture"]["date"]
+        self.home_name = fixture_data["teams"]["home"]["name"]
+        self.away_name = fixture_data["teams"]["away"]["name"]
         self.date_obj = datetime.fromisoformat(self.date_str.replace("Z", "+00:00")).astimezone(
             ZoneInfo("Europe/London"))
         self.formatted_date = self.date_obj.strftime('%Y-%m-%d')
@@ -22,10 +24,11 @@ class Fixture:
     def set_stats(self, stats):
         self.stats = stats
 
-    def recalculate_fixture_statistics_period(self, overs=2.5, no_games=5):
+    def recalculate_fixture_statistics_period(self, overs=2.5, no_games=2):
         home_team = self.home_team_history
         away_team = self.away_team_history
-
+        if "Tokyo" in self.away_name:
+            print("OK")
         home_team_stats = calculate_team_statistics_for_period(home_team, overs, no_games)
         away_team_stats = calculate_team_statistics_for_period(away_team, overs, no_games)
 
@@ -33,7 +36,7 @@ class Fixture:
             self.stats["home_team"][k] = home_team_stats[k]
 
         for k in away_team_stats.keys():
-            self.stats["away_team"][k] = home_team_stats[k]
+            self.stats["away_team"][k] = away_team_stats[k]
 
 
 

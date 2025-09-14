@@ -11,7 +11,7 @@ filter_countries = ["England", "Scotland", "France", "Germany", "Italy", "Croati
                     "Hungary","Finland","Norway","Iceland","Switzerland"]
 
 
-#gitfilter_countries = ["Germany","USA"]
+#filter_countries = ["Germany","Japan"]
 
 
 # - Filter Those Leagues Based On a Particular Country - #

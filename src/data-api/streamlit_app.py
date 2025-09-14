@@ -22,7 +22,7 @@ def get_stats_df():
 # --------------------
 # Fetch Fixtures
 # --------------------
-#@st.cache_data
+@st.cache_data
 def get_fixtures(today):
     print({"data": f"Fresh data generated on {today}"})
     all_bets = []
@@ -38,7 +38,7 @@ def get_fixtures(today):
         for day in fixtures:
             print(f"League: {current_league}")
             complete_fixtures.append(day)
-    time.sleep(10)
+    time.sleep(30)
 
     return complete_fixtures
 
