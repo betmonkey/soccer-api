@@ -27,3 +27,6 @@ class StatsStore:
 
         count += 1
         self._stats[key] = count
+
+    def reset(self):
+        _stats = {}

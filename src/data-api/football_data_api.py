@@ -48,3 +48,9 @@ def get_last_x_fixtures(team, num_games):
     url = f"{BASE_URL}/fixtures?team={team}&last={num_games}"
     response = requests.get(url, headers=HEADERS)
     return response.json().get("response", {})
+
+
+def get_season_historical_fixtures(team, league_id, season=2025, last_count=20):
+    url = f"{BASE_URL}/fixtures?team={team}&league={league_id}&season={season}&last={last_count}&status=FT-AET-PEN"
+    response = requests.get(url, headers=HEADERS)
+    return response.json().get("response", {})

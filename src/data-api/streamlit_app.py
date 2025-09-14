@@ -1,14 +1,18 @@
 import datetime
 import time
+from typing import List
 from zoneinfo import ZoneInfo
 import pandas as pd
-
 import streamlit as st
-
+import date_helper as dh
 
 import leagues
+from fixture import Fixture
+from fixturefactory import FixtureFactory
 from stats_store import StatsStore
 import matplotlib.pyplot as plt
+from fixture_filter import FilterFilter
+
 
 def get_stats_df():
     raw = StatsStore().all()
@@ -18,34 +22,40 @@ def get_stats_df():
 # --------------------
 # Fetch Fixtures
 # --------------------
-@st.cache_data
+#@st.cache_data
 def get_fixtures(today):
     print({"data": f"Fresh data generated on {today}"})
     all_bets = []
+    factory = FixtureFactory()
     leagues_list = leagues.filter_leagues()
-    all_bets = []
+    complete_fixtures: List[Fixture] = []
+    fixtures = None
     for current_league in leagues_list:
-        fixtures = leagues.filter_fixtures_by_weekend(current_league)
-        betting_list = leagues.validate_fixture_criteria(fixtures)
-        all_bets = all_bets + betting_list
-        #time.sleep(30)
+        #Gets Current Fixture List
+        days = dh.get_upcoming_weekend()
+        factory = FixtureFactory()
+        fixtures = factory.get_fixtures_for_league(current_league, days)
+        for day in fixtures:
+            print(f"League: {current_league}")
+            complete_fixtures.append(day)
+    #  time.sleep(10)
 
-    return all_bets
+    return complete_fixtures
 
 
 # Get today's date (string is better than datetime to avoid time granularity issues)
 today_str = datetime.date.today().strftime("%A, %d %B %Y")
-if datetime.date.today().weekday() in [4, 5, 6]:
-    today_str = "Weekend"
+#if datetime.date.today().weekday() in [4, 5, 6]:
+#    today_str = "Weekend"
 
 
-fixtures_data = get_fixtures(today_str)
+#fixtures_data = get_fixtures(today_str)
 
-# ✅ Sort fixtures by date/time
-fixtures_data = sorted(
-    fixtures_data,
-    key=lambda x: datetime.datetime.fromisoformat(x["fixture"]["date"].replace("Z", "+00:00"))
-)
+
+chooser = FilterFilter()
+#Got through each day and build up fixrurelist
+fixtures_data = []
+fixturesWithStats = get_fixtures(today_str)
 
 # Add CSS for grid layout once
 st.markdown("""
@@ -97,11 +107,52 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-
 st.set_page_config(page_title="Football Fixtures > 2.5")
 st.title("⚽  Football Fixtures > 2.5")
-st.markdown(f'<div class="league-title">{leagues.filter_countries}</div>', unsafe_allow_html=True)
 
+#Sliders for filter criteria
+
+with st.sidebar.expander("⚙️ Filter Criteria", expanded=False):
+
+    goals_consistency = st.slider(
+        "Goals Consistency", min_value=0.0, max_value=1.0, value=0.5, step=0.1
+    )
+
+    clean_sheet_ratio = st.slider(
+        "Clean Sheet Ratio", min_value=0.0, max_value=1.0, value=0.5, step=0.1
+    )
+
+    over_goal_per_game = st.slider(
+        "Over Goals Per Game", min_value=0.0, max_value=5.0, value=2.5, step=0.5
+    )
+
+    game_history = st.slider(
+        "Game History", min_value=1, max_value=10, value=2, step=1)
+
+
+#Get Filrered
+for fixforDay in fixturesWithStats:
+    print(clean_sheet_ratio)
+    for fix in fixforDay:
+        fix.recalculate_fixture_statistics_period(over_goal_per_game,game_history)
+
+    filturedFixures = chooser.filterFixtures(
+        fixforDay,
+        goals_consistency=goals_consistency,
+        clean_sheet_ratio=clean_sheet_ratio,
+        over_goal_per_game=over_goal_per_game
+
+    )
+    print("FILTERING")
+    if len(filturedFixures) > 0:
+        fixtures_data.extend(filturedFixures)
+
+# ✅ Sort fixtures by date/time
+fixtures_data = sorted(
+    fixtures_data,
+    key=lambda x: x.date_obj)
+
+st.markdown(f'<div class="league-title">{leagues.filter_countries}</div>', unsafe_allow_html=True)
 
 # Start grid container
 st.markdown('<div class="fixtures-grid">', unsafe_allow_html=True)
@@ -120,9 +171,9 @@ with left_col:
     current_league = None
 
     for fix in fixtures_data:
-        fixture = fix["fixture"]
-        teams = fix["teams"]
-        league = fix["league"]
+        fixture = fix.fixture["fixture"]
+        teams = fix.fixture["teams"]
+        league = fix.fixture["league"]
 
         home = teams['home']
         away = teams['away']
@@ -153,19 +204,5 @@ with left_col:
         </div>
         """
         st.markdown(card_html, unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
-
-df = get_stats_df()
-with right_col:
-    st.markdown('<div>', unsafe_allow_html=True)
-
-    fig, ax = plt.subplots()
-    ax.bar(df["Label"], df["Value"], color="cornflowerblue")
-    ax.set_ylabel("Games")
-    ax.tick_params(axis='x', labelrotation=45)
-
-    ax.set_title("Reasons")
-    st.pyplot(fig)
 
     st.markdown('</div>', unsafe_allow_html=True)
