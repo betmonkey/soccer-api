@@ -85,6 +85,12 @@ st.markdown("""
     max-width: 40%;
 }
 
+/* Smaller font for mobile screens */
+@media (max-width: 600px) {
+    .fixture-card .team span {
+        font-size: 10px; /* smaller size on mobile */
+    }
+}
 .fixture-card .team img {
     vertical-align: middle;
     margin: 0 6px;
@@ -159,6 +165,17 @@ st.markdown(f'''
 </div>
 ''', unsafe_allow_html=True)
 
+st.markdown(f'''
+<div style="text-align:left; font-size:10px; font-weight:bold;">
+Total Weekend Fixtures: {len(fixturesWithStats)}
+</div>
+''', unsafe_allow_html=True)
+
+st.markdown(f'''
+<div style="text-align:left; font-size:10px; font-weight:bold;">
+Total Selected: {len(fixtures_data)}
+</div>
+''', unsafe_allow_html=True)
 
 current_date = None
 current_league = None
