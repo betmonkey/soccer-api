@@ -235,7 +235,7 @@ for fix in fixtures_data:
     if current_league != league['name']:
 
         st.markdown(
-            f'<div class="league-title"><img src="{league["flag"]}" width="20" style="vertical-align:middle;"> {league["country"]} {league["name"]} - {league["round"]}</div>',
+            f'<div class="league-title"><img src="{league["flag"]}" width="20" style="vertical-align:middle;"> {league["country"]} : {league["name"]} - {league["round"]}</div>',
             unsafe_allow_html=True
         )
         current_league = league['name']
