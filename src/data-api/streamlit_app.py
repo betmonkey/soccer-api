@@ -50,73 +50,7 @@ chooser = FilterFilter()
 
 #Got through each day and build up fixrurelist
 fixtures_data = []
-fixturesWithStats = \
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    (today_str)
+fixturesWithStats = get_fixtures(today_str)
 
 # Add CSS for grid layout once
 st.markdown("""
