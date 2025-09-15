@@ -4,7 +4,6 @@ import requests
 from football_data_api import get_last_x_fixtures, get_statistics
 # --- API Setup ---
 
-from stats_store import StatsStore
 
 
 def default_if_zero(x, default=1):

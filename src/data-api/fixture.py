@@ -27,8 +27,7 @@ class Fixture:
     def recalculate_fixture_statistics_period(self, overs=2.5, no_games=2):
         home_team = self.home_team_history
         away_team = self.away_team_history
-        if "Tokyo" in self.away_name:
-            print("OK")
+
         home_team_stats = calculate_team_statistics_for_period(home_team, overs, no_games)
         away_team_stats = calculate_team_statistics_for_period(away_team, overs, no_games)
 

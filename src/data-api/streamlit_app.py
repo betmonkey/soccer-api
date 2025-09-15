@@ -9,7 +9,6 @@ import date_helper as dh
 import leagues
 from fixture import Fixture
 from fixturefactory import FixtureFactory
-from stats_store import StatsStore
 import matplotlib.pyplot as plt
 from fixture_filter import FilterFilter
 
@@ -47,17 +46,77 @@ def get_fixtures(today):
 
 # Get today's date (string is better than datetime to avoid time granularity issues)
 today_str = datetime.date.today().strftime("%A, %d %B %Y")
-#if datetime.date.today().weekday() in [4, 5, 6]:
-#    today_str = "Weekend"
-
-
-#fixtures_data = get_fixtures(today_str)
-
-
 chooser = FilterFilter()
+
 #Got through each day and build up fixrurelist
 fixtures_data = []
-fixturesWithStats = get_fixtures(today_str)
+fixturesWithStats = \
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    (today_str)
 
 # Add CSS for grid layout once
 st.markdown("""
@@ -157,7 +216,7 @@ fixtures_data = sorted(
 
 st.markdown(f'''
 <div style="text-align:center; font-size:24px; font-weight:bold;">
-⚽ Football Fixtures > {over_goal_per_game}
+Weekend Fixtures > {over_goal_per_game}
 </div>
 ''', unsafe_allow_html=True)
 
@@ -242,7 +301,7 @@ for fix in fixtures_data:
     if current_league != league['name']:
 
         st.markdown(
-            f'<div class="league-title"><img src="{league["flag"]}" width="20" style="vertical-align:middle;"> {league["name"]} - {league["round"]}</div>',
+            f'<div class="league-title"><img src="{league["flag"]}" width="20" style="vertical-align:middle;"> {league["country"]["name"]} {league["name"]} - {league["round"]}</div>',
             unsafe_allow_html=True
         )
         current_league = league['name']
