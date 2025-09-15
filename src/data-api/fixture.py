@@ -40,6 +40,8 @@ class Fixture:
 
 
 
+
+
     #@classmethod
     #def filter_high_scoring_candidates(cls, league):
     #    candidates = []

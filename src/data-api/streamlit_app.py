@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from fixture_filter import FilterFilter
 
 
+
 def get_stats_df():
     raw = StatsStore().all()
     return pd.DataFrame(list(raw.items()), columns=["Label", "Value"])
@@ -26,7 +27,9 @@ def get_stats_df():
 def get_fixtures(today):
     print({"data": f"Fresh data generated on {today}"})
     all_bets = []
+    #Reset Singleton Every Day
     factory = FixtureFactory()
+    #factory.reset()
     leagues_list = leagues.filter_leagues()
     complete_fixtures: List[Fixture] = []
     fixtures = None
@@ -34,13 +37,16 @@ def get_fixtures(today):
         #Gets Current Fixture List
         days = dh.get_upcoming_weekend()
         factory = FixtureFactory()
+        print(f"Loading League Fixtures: {current_league["league"]["name"]}")
         fixtures = factory.get_fixtures_for_league(current_league, days)
         for day in fixtures:
-            print(f"League: {current_league}")
             complete_fixtures.append(day)
-    time.sleep(30)
 
     return complete_fixtures
+
+
+
+
 
 
 # Get today's date (string is better than datetime to avoid time granularity issues)
@@ -60,60 +66,52 @@ fixturesWithStats = get_fixtures(today_str)
 # Add CSS for grid layout once
 st.markdown("""
 <style>
-.fixtures-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
-    gap: 16px;
-    margin-top: 10px;
-}
 .fixture-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border: 1px solid #e0e0e0;
+    border: 1px solid #ddd;
     border-radius: 12px;
     padding: 12px 16px;
+    margin: 12px 0;
     background: #fff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
     font-family: Arial, sans-serif;
 }
+
 .fixture-card .team {
     display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 14px;
+    flex-direction: column;
+    max-width: 40%;
 }
+
+.fixture-card .team img {
+    vertical-align: middle;
+    margin: 0 6px;
+}
+
+.fixture-card .team-results {
+    font-size: 8px;
+    color: #666;
+    margin-top: 4px;
+    line-height: 1.3em;
+}
+
 .fixture-card .time {
+    font-size: 13px;
     font-weight: bold;
-    font-size: 14px;
     color: #333;
-}
-.date-header {
-    grid-column: 1 / -1;
-    font-size: 16px;
-    font-weight: 700;
-    color: #222;
-    margin: 16px 0 4px 0;
-    padding-top: 10px;
-    border-top: 2px solid #ddd;
-}
-.league-title {
-    grid-column: 1 / -1;
-    font-size: 14px;
-    font-weight: 600;
-    color: #555;
-    margin: 6px 0 2px 0;
+    padding: 0 10px;
+    white-space: nowrap;
 }
 </style>
 """, unsafe_allow_html=True)
 
-st.set_page_config(page_title="Football Fixtures > 2.5")
-st.title("⚽  Football Fixtures > 2.5")
+
 
 #Sliders for filter criteria
 
 with st.sidebar.expander("⚙️ Filter Criteria", expanded=False):
-
     goals_consistency = st.slider(
         "Goals Consistency", min_value=0.0, max_value=1.0, value=0.5, step=0.1
     )
@@ -130,11 +128,12 @@ with st.sidebar.expander("⚙️ Filter Criteria", expanded=False):
         "Game History", min_value=1, max_value=10, value=2, step=1)
 
 
+
 #Get Filrered
 for fixforDay in fixturesWithStats:
     print(clean_sheet_ratio)
     for fix in fixforDay:
-        fix.recalculate_fixture_statistics_period(over_goal_per_game,game_history)
+        fix.recalculate_fixture_statistics_period(over_goal_per_game, game_history)
 
     filturedFixures = chooser.filterFixtures(
         fixforDay,
@@ -143,7 +142,7 @@ for fixforDay in fixturesWithStats:
         over_goal_per_game=over_goal_per_game
 
     )
-    print("FILTERING")
+
     if len(filturedFixures) > 0:
         fixtures_data.extend(filturedFixures)
 
@@ -152,57 +151,103 @@ fixtures_data = sorted(
     fixtures_data,
     key=lambda x: x.date_obj)
 
-st.markdown(f'<div class="league-title">{leagues.filter_countries}</div>', unsafe_allow_html=True)
 
-# Start grid container
-st.markdown('<div class="fixtures-grid">', unsafe_allow_html=True)
+
+st.markdown(f'''
+<div style="text-align:center; font-size:24px; font-weight:bold;">
+⚽ Football Fixtures > {over_goal_per_game}
+</div>
+''', unsafe_allow_html=True)
+
 
 current_date = None
 current_league = None
 
-# Create two columns: left for fixtures, right for chart
-left_col, right_col = st.columns([2, 1])  # Wider left column for grid
 
-with left_col:
-    # Start grid container
-    st.markdown('<div class="fixtures-grid">', unsafe_allow_html=True)
 
-    current_date = None
-    current_league = None
+current_date = None
+current_league = None
 
-    for fix in fixtures_data:
-        fixture = fix.fixture["fixture"]
-        teams = fix.fixture["teams"]
-        league = fix.fixture["league"]
+current_date = None
+current_league = None
 
-        home = teams['home']
-        away = teams['away']
-        time = fixture["date"]
+# Helper to build results as HTML inside the card
+def build_results_html(history, team_type="home"):
+    results = []
+    for f in history:
+        home_team = f['teams']['home']['name']
+        away_team = f['teams']['away']['name']
+        home_goals = f['goals']['home']
+        away_goals = f['goals']['away']
 
-        kickoff_dt = datetime.datetime.fromisoformat(time.replace("Z", "+00:00")).astimezone(ZoneInfo("Europe/London"))
-        kickoff_date = kickoff_dt.strftime("%A, %d %B %Y")
-        kickoff_time = kickoff_dt.strftime("%H:%M")
+        if team_type == "home":
+            indicator = "🟢" if home_goals > away_goals else "🔴" if home_goals < away_goals else "⚪"
+        else:
+            indicator = "🟢" if away_goals > home_goals else "🔴" if away_goals < home_goals else "⚪"
 
-        if current_date != kickoff_date:
-            st.markdown(f'<div class="date-header">{kickoff_date}</div>', unsafe_allow_html=True)
-            current_date = kickoff_date
-            current_league = None
+        # Use <b> for bold goals
+        results.append(f"{indicator} {home_team} <b>{home_goals}</b> - {away_team} <b>{away_goals}</b>")
 
-        if current_league != league['name']:
-            st.markdown(f'<div class="league-title">{league["name"]} - {league["round"]}</div>', unsafe_allow_html=True)
-            current_league = league['name']
+    return "<br>".join(results)
 
-        card_html = f"""
-        <div class="fixture-card">
-            <div class="team">
-                <img src="{home['logo']}" width="22"> {home['name']}
+# Loop through fixtures
+for fix in fixtures_data:
+    fixture = fix.fixture["fixture"]
+    teams = fix.fixture["teams"]
+    league = fix.fixture["league"]
+
+    home = teams['home']
+    away = teams['away']
+    time = fixture["date"]
+
+    home_history = fix.home_team_history[:game_history]
+    away_history = fix.away_team_history[:game_history]
+
+    home_result_html = build_results_html(home_history)
+    away_result_html = build_results_html(away_history, team_type="away")
+
+    kickoff_dt = datetime.datetime.fromisoformat(time.replace("Z", "+00:00")).astimezone(ZoneInfo("Europe/London"))
+    kickoff_date = kickoff_dt.strftime("%A, %d %B %Y")
+    kickoff_time = kickoff_dt.strftime("%H:%M")
+
+    # Render date header if new
+    if current_date != kickoff_date:
+        #if current_date is not None:
+        st.markdown("<hr>", unsafe_allow_html=True)
+        st.markdown(f'<div class="date-header"><b>{kickoff_date}</b></div>', unsafe_allow_html=True)
+        current_date = kickoff_date
+        current_league = None
+
+    # Render league header if new
+    if current_league != league['name']:
+
+        st.markdown(
+            f'<div class="league-title"><img src="{league["flag"]}" width="20" style="vertical-align:middle;"> {league["name"]} - {league["round"]}</div>',
+            unsafe_allow_html=True
+        )
+        current_league = league['name']
+
+    # Build and render full fixture card
+    card_html = f"""
+    <div class="fixture-card">
+        <!-- Home team -->
+        <div class="team">
+            <div style="display:flex; align-items:center; gap:6px;">
+                <img src="{home['logo']}" width="22">
+                <span>{home['name']}</span>
             </div>
-            <div class="time">{kickoff_time}</div>
-            <div class="team" style="justify-content: flex-end;">
-                {away['name']} <img src="{away['logo']}" width="22">
-            </div>
+            <div class="team-results">{home_result_html}</div>
         </div>
-        """
-        st.markdown(card_html, unsafe_allow_html=True)
-
-    st.markdown('</div>', unsafe_allow_html=True)
+        <!-- Kickoff time -->
+        <div class="time">{kickoff_time}</div>
+        <!-- Away team -->
+        <div class="team" style="text-align:right;">
+            <div style="display:flex; justify-content:flex-end; align-items:center; gap:6px;">
+                <span>{away['name']}</span>
+                <img src="{away['logo']}" width="22">
+            </div>
+            <div class="team-results" style="text-align:right;">{away_result_html}</div>
+        </div>
+    </div>
+    """
+    st.markdown(card_html, unsafe_allow_html=True)

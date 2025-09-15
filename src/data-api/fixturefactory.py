@@ -1,4 +1,5 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
+from time import sleep
 from zoneinfo import ZoneInfo
 from football_data_api import get_season_historical_fixtures, get_last_x_fixtures
 from fixture import *
@@ -16,16 +17,21 @@ class SingletonMeta(type):
         return cls._instances[cls]
 
 
+
+
 class FixtureFactory(metaclass=SingletonMeta):
     def __init__(self):
+        self._cache = {}
+
+    def reset(self):
         self._cache = {}
 
     def get_fixtures_for_league(self, league, days):
         fixtures = []
         for day in days:
             key = f"{league['league']['id']}_{day}"
-            if key in self._cache:
-                print("FOUND IN CACHE")
+            #if key in self._cache:
+               # print("FOUND IN CACHE")
 
             if key not in self._cache:
                 base_fixtures = get_fixtures(league, day)
@@ -43,6 +49,8 @@ class FixtureFactory(metaclass=SingletonMeta):
                     fixture.recalculate_fixture_statistics_period()
                     fixturelist.append(fixture)
                 self._cache[key] = fixturelist
+
+                sleep(10)
             fixtures.append(self._cache[key])
         return fixtures
 
@@ -63,5 +71,3 @@ class FixtureFactory(metaclass=SingletonMeta):
 
         return {'home_team': enriched_home_team_stats,
                 'away_team': enriched_away_team_stats}
-
-
