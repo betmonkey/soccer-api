@@ -15,10 +15,6 @@ from fixture_filter import FilterFilter
 
 
 
-def get_stats_df():
-    raw = StatsStore().all()
-    return pd.DataFrame(list(raw.items()), columns=["Label", "Value"])
-
 
 # --------------------
 # Fetch Fixtures
@@ -174,6 +170,13 @@ Total Weekend Fixtures: {len(fixturesWithStats)}
 st.markdown(f'''
 <div style="text-align:left; font-size:10px; font-weight:bold;">
 Total Selected: {len(fixtures_data)}
+</div>
+''', unsafe_allow_html=True)
+
+
+st.markdown(f'''
+<div style="text-align:left; font-size:10px; font-weight:bold;">
+Leagues In Play: {leagues.filter_countries}
 </div>
 ''', unsafe_allow_html=True)
 
