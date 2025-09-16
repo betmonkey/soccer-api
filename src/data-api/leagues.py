@@ -8,10 +8,11 @@ from team_statistics import *
 
 # - "England","Scotland","France","Germany","Italy", "Croatia", "Denmark","Ireland","USA"
 filter_countries = ["England", "Scotland", "France", "Germany", "Italy", "Croatia", "Denmark", "Ireland", "USA","Japan",
-                    "Hungary","Finland","Norway","Iceland","Switzerland","Spain","Netherlands", "Portugal", "Poland", "Belgium"]
+                    "Hungary","Finland","Norway","Iceland","Switzerland","Spain","Netherlands", "Portugal", "Poland", "Belgium","Brazil","Turkey"]
 
 
-#filter_countries = ["Germany","Japan"]
+#filter_countries = ["Finland"]
+
 
 
 # - Filter Those Leagues Based On a Particular Country - #

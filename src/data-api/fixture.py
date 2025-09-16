@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from football_data_api import get_fixtures
-from team_statistics import get_team_statistics_for_season, calculate_team_statistics_for_period
+from team_statistics import get_team_statistics_for_season, calculate_team_statistics_for_period, calculate_per_over_for_period
 
 
 class Fixture:
@@ -31,15 +31,22 @@ class Fixture:
         home_team_stats = calculate_team_statistics_for_period(home_team, overs, no_games)
         away_team_stats = calculate_team_statistics_for_period(away_team, overs, no_games)
 
+        self.__update_dict(home_team_stats,away_team_stats)
+
+
+        home_team_perc = calculate_per_over_for_period(home_team, threshold=overs)
+        away_team_perc = calculate_per_over_for_period(away_team, threshold=overs)
+
+        self.__update_dict(home_team_perc, away_team_perc)
+
+
+
+    def __update_dict(self, home_team_stats, away_team_stats):
         for k in home_team_stats.keys():
             self.stats["home_team"][k] = home_team_stats[k]
 
         for k in away_team_stats.keys():
             self.stats["away_team"][k] = away_team_stats[k]
-
-
-
-
 
     #@classmethod
     #def filter_high_scoring_candidates(cls, league):

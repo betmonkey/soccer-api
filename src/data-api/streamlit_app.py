@@ -99,6 +99,27 @@ st.markdown("""
     padding: 0 10px;
     white-space: nowrap;
 }
+
+
+.percentage-container {
+    width: 60px; /* max width */
+    background-color: #e0e0e0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.percentage-box {
+    height: 18px;
+    line-height: 18px;
+    background-color: #4caf50;
+    color: white;
+    text-align: center;
+    font-size: 10px;
+    font-weight: bold;
+    transition: width 0.3s ease-in-out;
+}
+
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -248,6 +269,11 @@ for fix in fixtures_data:
             <div style="display:flex; align-items:center; gap:6px;">
                 <img src="{home['logo']}" width="22">
                 <span>{home['name']}</span>
+                 <div class="percentage-container">
+                    <div class="percentage-box" style="width:{fix.stats['home_team']['total_perc_of_over_x']:.0f}%;">
+                        {fix.stats["home_team"]["total_perc_of_over_x"]:.0f}%
+                    </div>
+                </div>
             </div>
             <div class="team-results">{home_result_html}</div>
         </div>
@@ -256,6 +282,11 @@ for fix in fixtures_data:
         <!-- Away team -->
         <div class="team" style="text-align:right;">
             <div style="display:flex; justify-content:flex-end; align-items:center; gap:6px;">
+                <div class="percentage-container">
+                    <div class="percentage-box" style="width:{fix.stats['away_team']['total_perc_of_over_x']:.0f}%;">
+                        {fix.stats["away_team"]["total_perc_of_over_x"]:.0f}%
+                    </div>
+                </div>
                 <span>{away['name']}</span>
                 <img src="{away['logo']}" width="22">
             </div>

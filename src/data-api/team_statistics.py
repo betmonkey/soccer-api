@@ -2,8 +2,9 @@ from datetime import datetime
 
 import requests
 from football_data_api import get_last_x_fixtures, get_statistics
-# --- API Setup ---
 
+
+# --- API Setup ---
 
 
 def default_if_zero(x, default=1):
@@ -78,6 +79,20 @@ def get_team_statistics_for_season(team_stats, overs=2.5):
 
     return features
 
+
+def calculate_per_over_for_period(team_history, threshold=2.5,no_games=10):
+    total = len(team_history)
+    if total > no_games:
+        total = no_games
+    games_over = 0
+    for fixture in team_history[:no_games]:
+        if fixture["goals"]["home"] + fixture["goals"]["away"] > threshold:
+            games_over += 1
+    #no calculate the percentage for the team
+    features = {
+        "total_perc_of_over_x": (games_over/total)*100
+    }
+    return features
 
 def calculate_team_statistics_for_period(team_history, overs, no_games):
     features = {
