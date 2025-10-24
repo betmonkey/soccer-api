@@ -8,7 +8,7 @@ from team_statistics import *
 
 # - "England","Scotland","France","Germany","Italy", "Croatia", "Denmark","Ireland","USA"
 filter_countries = ["England", "Scotland", "France", "Germany", "Italy", "Croatia", "Denmark", "Ireland", "USA","Japan",
-                    "Hungary","Finland","Norway","Iceland","Switzerland","Spain","Netherlands", "Portugal", "Poland", "Belgium","Brazil","Turkey"]
+                    "Hungary","Finland","Norway","Iceland","Switzerland","Spain","Netherlands", "Portugal", "Poland","Brazil","Turkey","Serbia"]
 
 
 #filter_countries = ["Finland"]

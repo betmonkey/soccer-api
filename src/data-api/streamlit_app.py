@@ -112,9 +112,9 @@ st.markdown("""
     height: 18px;
     line-height: 18px;
     background-color: #4caf50;
-    color: white;
+    color: green;
     text-align: center;
-    font-size: 10px;
+    font-size: 6px;
     font-weight: bold;
     transition: width 0.3s ease-in-out;
 }
