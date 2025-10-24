@@ -37,17 +37,22 @@ class FixtureFactory(metaclass=SingletonMeta):
                 base_fixtures = get_fixtures(league, day)
                 fixturelist = []
                 for base_fixture in base_fixtures:
-                    fixture = Fixture(base_fixture)
-                    fixture.home_team_history = self.__fetch_fixture_team_history(fixture.home_id, fixture.league_id,
-                                                                                  fixture.season)
-                    fixture.away_team_history = self.__fetch_fixture_team_history(fixture.away_id, fixture.league_id,
-                                                                                  fixture.season)
-                    # fixture.home_team_history = self.__fetch_last_x_games(fixture.home_id,2)
-                    # fixture.away_team_history = self.__fetch_last_x_games(fixture.away_id,2)
-                    stats = self.__fetch_statistics(fixture)
-                    fixture.set_stats(stats)
-                    fixture.recalculate_fixture_statistics_period()
-                    fixturelist.append(fixture)
+                    try:
+                        fixture = Fixture(base_fixture)
+                        fixture.home_team_history = self.__fetch_fixture_team_history(fixture.home_id, fixture.league_id,
+                                                                                      fixture.season)
+                        fixture.away_team_history = self.__fetch_fixture_team_history(fixture.away_id, fixture.league_id,
+                                                                                      fixture.season)
+                        # fixture.home_team_history = self.__fetch_last_x_games(fixture.home_id,2)
+                        # fixture.away_team_history = self.__fetch_last_x_games(fixture.away_id,2)
+                        stats = self.__fetch_statistics(fixture)
+                        fixture.set_stats(stats)
+                        fixture.recalculate_fixture_statistics_period()
+                        fixturelist.append(fixture)
+
+                    except Exception as e:
+                        print(f"Error processing fixture {base_fixture}: {e}")
+
                 self._cache[key] = fixturelist
 
                 sleep(10)
